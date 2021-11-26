@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectVersion>2.1</ProjectVersion>
+    <DockerTargetOS>Linux</DockerTargetOS>
+    <ProjectGuid>cf9d62da-b5f3-44ab-8efb-5ba2dbcd35b3</ProjectGuid>
+    <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
+    <DockerServiceName>daprmall.product</DockerServiceName>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="dapr\components\pubsub.yaml" />
+    <None Include="dapr\components\statestore.yaml" />
+    <None Include="dapr\configuration\config.yaml" />
+    <None Include="docker-compose.override.yml">
+      <DependentUpon>docker-compose.yml</DependentUpon>
+    </None>
+    <None Include="docker-compose.yml" />
+    <None Include=".dockerignore" />
+    <None Include="envoy\envoy.yaml" />
+  </ItemGroup>
+</Project>

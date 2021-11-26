@@ -1,0 +1,125 @@
+version: '3.4'
+
+services:
+  daprmall.product:
+    image: ${DOCKER_REGISTRY-}daprmallproduct
+    build:
+      context: .
+      dockerfile: DaprMall.Product/Dockerfile
+    ports:
+      - "7100:80"
+      - "7101:50001"
+      - "7102:3500"
+    depends_on:
+      - redis
+      - placement
+    networks:
+      - hello-dapr
+
+  daprmall.product-dapr:
+    image: "daprio/daprd:latest"
+    command: ["./daprd",
+      "-app-id", "productservice",
+      "-app-port", "80",
+      "-placement-host-address", "placement:60000",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    depends_on:
+      - daprmall.product
+    network_mode: "service:daprmall.product"
+
+  daprmall.cart:
+    image: ${DOCKER_REGISTRY-}daprmallcart
+    build:
+      context: .
+      dockerfile: DaprMall.Cart/Dockerfile
+    ports:
+      - "7200:80"
+      - "7201:50001"
+      - "7202:3500"
+    depends_on:
+      - redis
+      - placement
+    networks:
+      - hello-dapr
+
+  daprmall.cart-dapr:
+    image: "daprio/daprd:latest"
+    command: ["./daprd",
+      "-app-id", "cartservice",
+      "-app-port", "80",
+      "-placement-host-address", "placement:60000",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    depends_on:
+      - daprmall.cart
+    network_mode: "service:daprmall.cart"
+
+
+  daprmall.web:
+    image: ${DOCKER_REGISTRY-}daprmallweb
+    build:
+      context: .
+      dockerfile: DaprMall.Web/Dockerfile
+    ports:
+      - "7300:80"
+    networks:
+      - hello-dapr
+
+  placement:
+    image: "daprio/dapr"
+    command: ["./placement", "-port", "60000"]
+    ports:
+      - "60000:60000"
+    networks:
+      - hello-dapr
+
+  zipkin:
+    image: "openzipkin/zipkin:latest"
+    ports:
+      - "5411:9411"
+    networks:
+      - hello-dapr
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    networks:
+      - hello-dapr
+
+  apigateways:
+    image: envoyproxy/envoy:v1.14.2
+    volumes:
+      - "./envoy:/etc/envoy"
+    ports:
+    - "7700:80"
+    - "7701:50001"
+    - "7702:8001"
+    networks:
+      - hello-dapr
+
+  apigateways-dapr:
+    image: "daprio/daprd:latest"
+    command: ["./daprd",
+      "-app-id", "apiservice",
+      "-app-port", "80",
+      "-placement-host-address", "placement:60000",
+      "-components-path", "/components",
+      "-config", "/configuration/config.yaml"]
+    volumes:
+      - "./dapr/components/:/components"
+      - "./dapr/configuration/:/configuration"
+    network_mode: "service:apigateways"
+    depends_on:
+      - apigateways
+
+
+networks:
+    hello-dapr:

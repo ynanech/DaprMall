@@ -1,0 +1,31 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+name: daprmall
+extensions:
+- name: dapr
+  log-level: debug
+  components-path: dapr/components 
+  grpc-port: 6660
+  placement-port: 6666
+  http-port: 6661
+  
+services:
+- name: daprmall-web
+  project: ../DaprMall.Web/DaprMall.Web.csproj
+  bindings:
+    - port: 6600
+      protocol: http  
+- name: daprmall-cart
+  project: ../DaprMall.Cart/DaprMall.Cart.csproj
+  bindings:
+    - port: 6601
+      protocol: http  
+- name: daprmall-product
+  project: ../DaprMall.Product/DaprMall.Product.csproj
+  bindings:
+    - port: 6602
+      protocol: http  
